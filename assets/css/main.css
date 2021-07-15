@@ -484,7 +484,7 @@ input, select, textarea {
 		}
 
 			.row > * {
-				padding: 0 0 0 2.5em;
+				padding: 0 0 0 .5em;
 			}
 
 			.row.gtr-uniform {
@@ -2550,7 +2550,7 @@ input, select, textarea {
 /* Work Item */
 
 	.work-item {
-		margin: 0 0 2em 0;
+		margin: 0 0 .5em 0;
 	}
 
 		.work-item .image {
