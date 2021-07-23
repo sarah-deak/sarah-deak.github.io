@@ -2038,6 +2038,7 @@ input, select, textarea {
 		border: 0;
 		display: inline-block;
 		position: relative;
+		width: 100%
 	}
 
 		.image:before {
@@ -3266,4 +3267,10 @@ input, select, textarea {
 	.text-scrunchy {
 		margin: 0;
 		padding: 0;
+	}
+
+	.reflection {
+		border: 1px solid #bba5cc;
+		border-left: 25px solid #bba5cc;
+		padding: 2% 2% 0 2%;
 	}
