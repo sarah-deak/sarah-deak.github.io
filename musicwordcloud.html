@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+	<head>
+			<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+			<link rel="preconnect" href="https://fonts.gstatic.com">
+			<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+	</head>
+	<style>
+		body { /*applied to entire webpage*/
+			background-color: black; /*black background color*/
+			min-height: 100%; /*minimum webpage height*/
+			background-image: url(background.jpg); /*background image set to clouds + background image set up*/
+			background-size: cover; 
+			background-repeat: no-repeat;
+			background-position: center center;
+			background-attachment: fixed;
+			font-family: 'Fredoka One', cursive; /*sets font family for website*/
+
+			}
+		#overlay { /*applies dark overlay to background image for depth (copied from online)*/
+			position: fixed; 
+			width: 100%; 
+			height: 100%;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background-color: rgba(0,0,0,0.5);
+			z-index: -1;
+			}
+		.centered {
+			text-align: center;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			color: white;
+		}
+		}
+		
+		.failed {
+			z-index: 2;
+			}
+		
+		.pic {
+			z-index: 2;
+			background-color: whitesmoke; 
+			border-radius: 12px;
+			
+			}
+		.lyrics {
+			z-index: 2;
+			}
+		input {
+			z-index: 2;
+			width: 100%;
+			padding: 12px 20px;
+			margin: 8px 0;
+			display: inline-block;
+			border: 1px solid #ccc;
+			border-radius: 4px;
+			box-sizing: border-box;
+			}
+		button { /*button formatting (copied from online & altered)*/
+			z-index: 2;
+			color: white; 
+			font-size: 28px; 
+			line-height: 28px; 
+			padding: 17px; 
+			border-radius: 50px; 
+			font-family: 'Fredoka One', cursive;
+			font-weight: normal; 
+			text-decoration: none; 
+			font-style: normal; 
+			font-variant: normal; 
+			text-transform: none; 
+			background-image: linear-gradient(to right, #2b5876 0%, #4e4376  51%, #2b5876  100%);
+			display: inline-block;
+			border-width: 0;
+			transition: 0.5s;
+			background-size: 200% auto; 
+			border-color: white;
+			border-width: medium;
+         
+			}
+		button:hover {
+			background-position: right center; /* change the direction of the change here */
+      text-decoration: none;
+			cursor: pointer;
+			}
+		button:focus {
+			outline: none;
+		}
+		}
+		
+	
+	</style>
+	
+	<script>
+		var api_key = "7b44de807c853ff21acb8cfd49b0b787" // API key needed to utilize musixmatch API
+		corsURL = "https://eric-cors-proxy.herokuapp.com/"; //CORS anywhere proxy server I utilized instead of the chrome extension (found online)
+		$(document).ready(function(){ 
+			$(".btn").click(function(){		//on button click clear all information already on the screen
+				$(".failed").html("") 			//^^("song not found" text)
+				$(".pic").attr("src", "")		//^^ (word cloud image)
+				$(".failed").html("Loading...") // (add text that tells the user that the webpage is loading the information)
+				var song_name = $(".a input").val(); // sets variable song_name to the users input
+				$(".a").html("<input value=''>"); 
+				var musicURL = "https://api.musixmatch.com/ws/1.1/" //sets musicURL variable to the musixmatch API url because I use it multiple times
+				data = "matcher.track.get?" + "apikey=" + api_key + "&q_track=" + encodeURIComponent(song_name) //sets the rest of the endpoint url + parameters (q_track)
+				URL = musicURL + data //final url
+				var track_id = 0; //creates track_id variable
+				
+				$.ajax({ //first API call
+					url: corsURL,
+					type: "GET",
+					dataType: "json",
+					headers: {"Target-URL": URL},
+					success: function(response){ //upon call success:
+						console.log(response) //^^print the response to the console &
+						if (response.message.header.status_code != 200) { //if there was anything accept a 200 code(success code) when retrieving data,
+							$(".failed").html("Song not found! Try another one.") //print "song not found"
+							$(".failed").attr("style", "font-size: 40px;"); //make font size larger
+
+							return; //and then stop all further calls
+						}
+						else { //basically if it works and finds the lyrics then
+							$(".failed").html("Still Loading....."); //tell the user the website is still loading
+							$(".failed").attr("style", "font-size: 40px;");
+							//it then also continue onto the second API call
+
+						}
+						track_id = response.message.body.track.track_id; //sets track_id variable to the track_id in the JSON Object response
+						URL = musicURL + "track.lyrics.get?" + "apikey=" + api_key+ "&track_id=" + track_id //creates the API URL using musixmatch api url + endpoint + parameters
+						$.ajax({ //second API call
+							url: corsURL ,
+							type: "GET",
+							dataType: "json",
+							headers: {"Target-URL": URL},
+							success: function(res) { //upon success of this API call
+								console.log(res) //print the response to the console
+								if (res.message.header.status_code != 200) { //if there was anything accept a 200 code (success code) when retrieving data,
+									$(".failed").html("Song not found! Try another one.") //print song not found
+									$(".failed").attr("style", "font-size: 40px;");	
+									return; //and stop all further calls
+								}
+								var lyrics = res.message.body.lyrics.lyrics_body; //sets variable lyrics to the 
+								if (lyrics.length == 0) { //if there were no lyrics in the JSON response (successfully found lyrics but there are none in the song)
+									$(".failed").html("Song not found! Try another one.") //print song not found
+									$(".failed").attr("style", "font-size: 40px;"); 
+									return; //stop all further calls
+								}
+								lyrics = lyrics.slice(0,lyrics.length-75) //the musixmatch API only allowed me to utilize the first 30% of the lyrics of the song, and then put copyright information with some asterisks. This line of JS removes that copyright information from being utilized within the word cloud.
+								
+								//it then moves onto the third call if successful
+								
+								var baseURL = "https://quickchart.io/wordcloud"; //second API utilization & third API call (if all else works fine the website will move onto this call)
+								data = "?text=" + encodeURIComponent(lyrics) + "&width=" + 500 + "&height=" + 500 + "&scale=linear&minWordLength=4&language=en&fontFamily=sans-serif" //super simple API implementation, based on the documentation for wordcloud API
+								$(".pic").attr("src",  baseURL+data) //makes word cloud image appear
+								$(".failed").html("") //removes failed text
+							},
+							error: function(err) { 
+								console.log("poo poo bananas");
+							}
+						});
+					},
+					error: function(err) {
+						console.log("poo poo bananas")
+						console.log(err);
+					}
+				});	
+			});
+		});
+
+	</script>
+	
+	<body>
+		<div class="centered"> <!--pairs with CSS to center all elements-->
+			<p class="failed" style= "font-size:40px">Enter the name of a song!</p> <!--will either display initial text, "song not found", or loading text-->
+			<img class="pic" src=""/> <!--display word cloud image-->
+			<p class="a"><input placeholder="Input your song here!"></p> <!-- user text input box for song name-->
+			<button class="btn">Word Cloudify My Song</button> <!--submit song name button-->
+		</div>
+		<div id="overlay"></div> <!--makes the background image a little darker-->
+	</body>
+	
+</html>
