@@ -3287,6 +3287,28 @@ input, select, textarea {
 		padding: 2% 2% 0 2%;
 	}
 
+	.callout {
+		padding: 1em;
+		background-color: #bba5cc;
+		color: white;
+		font-size: small;
+	  }
+	  
+	  .white {
+		color: white !important;
+	  }
+
+	#one p {
+	  margin: 0 0 1em 0;
+	}
+
+	.info {
+		border-left-width: 1em;
+		border-color: #bba5cc;
+		border-style: solid;
+		padding-left: 1em;
+	}
+
 	* {box-sizing:border-box}
 
 	/* Slideshow container */
